@@ -1,0 +1,7 @@
+namespace Gadget
+{
+    class Utils
+    {
+
+    }
+}
