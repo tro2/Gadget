@@ -28,7 +28,8 @@ namespace Gadget
 
         public bool InitValues()
         {
-            string? filepath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Data\\botconfig.json";
+            string? filepath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "", @"Data\botconfig.json");
+            bool success = false;
 
             if (File.Exists(filepath))
             {
@@ -36,32 +37,42 @@ namespace Gadget
                 {
                     BotConfig? config = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText(filepath));
 
-                    if (config != null)
+                    if (config != null && !string.IsNullOrWhiteSpace(config.Token) && !string.IsNullOrWhiteSpace(config.OwnerId))
                     {
                         this.Token = config.Token;
                         this.OwnerId = config.OwnerId;
 
-                        if (containsDefaultValues())
+                        Console.WriteLine(config.Token, config.OwnerId);
+
+                        if (ContainsDefaultValues())
                         {
-                            Console.WriteLine("Botconfig cotains default values, please overwrite them before starting the bot again");
-
-                            return false;
+                            Logger.Write(Discord.LogSeverity.Error, "Bot config cotains default values, please overwrite them before starting the bot again");
                         }
-
-                        return true;
+                        else
+                        {
+                            success = true;
+                        }
                     }
-
-                    //TODO
-                    //Log that the config was in an unreadable format
+                    else
+                    {
+                        Logger.Write(Discord.LogSeverity.Error, "Bot config was in an unreadable format");
+                    }
                 }
                 catch (Exception e)
                 {
-                    //TODO
-                    //Logging
-                    Console.WriteLine(e.Message);
+                    Logger.Write(Discord.LogSeverity.Error, "", e);
                 }
             }
+            else
+            {
+                WriteDefaultConfig(filepath);
+            }
 
+            return success;
+        }
+
+        private void WriteDefaultConfig(string filepath)
+        {
             BotConfig inputConfig = new BotConfig()
             {
                 Token = "token",
@@ -72,14 +83,10 @@ namespace Gadget
 
             System.IO.File.WriteAllText(filepath, input);
 
-            //TODO
-            //Proper logging of below lines
-            Console.WriteLine("New botconfig.json created with default values, overwrite them before starting the bot");
-
-            return false;
+            Logger.Write(Discord.LogSeverity.Error, "New botconfig.json created with default values, overwrite them before starting the bot");
         }
 
-        public bool containsDefaultValues()
+        private bool ContainsDefaultValues()
         {
             return (Token == "token" && OwnerId == "-1");
         }
