@@ -42,8 +42,6 @@ namespace Gadget
                         this.Token = config.Token;
                         this.OwnerId = config.OwnerId;
 
-                        Console.WriteLine(config.Token, config.OwnerId);
-
                         if (ContainsDefaultValues())
                         {
                             Logger.Write(Discord.LogSeverity.Error, "Bot config cotains default values, please overwrite them before starting the bot again");

@@ -67,6 +67,10 @@ namespace Gadget
 
             //TODO
             //Setup Database
+            if (!Database.TestPing())
+            {
+                return;
+            }
 
             // Centralize the logic for commands into a separate method.
             await _commandHandler.InstallCommandsAsync();
