@@ -1,4 +1,5 @@
 {
     "Token": "token",
-    "OwnerId": "-1"
+    "OwnerId": "-1",
+    "TestGuildId": 0
 }

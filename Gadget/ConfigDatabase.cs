@@ -25,7 +25,7 @@ namespace Gadget
             return success;
         }
 
-        public static bool retrieve(string tableName, string columnName, string guildId, out string output)
+        public static bool Retrieve(string tableName, string columnName, string guildId, out string output)
         {
             output = "";
             bool success = false;

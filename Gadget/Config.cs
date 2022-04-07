@@ -11,8 +11,9 @@ namespace Gadget
 
         public BotConfig()
         {
-            Token = "";
-            OwnerId = "";
+            Token = "token";
+            OwnerId = "-1";
+            TestGuildId = ulong.MinValue;
         }
 
         //==========================================================================
@@ -22,6 +23,8 @@ namespace Gadget
         public string Token { get; set; }
         [JsonProperty]
         public string OwnerId { get; set; }
+        [JsonProperty]
+        public ulong TestGuildId { get; set; }
 
         //==========================================================================
         // Methods
@@ -41,6 +44,7 @@ namespace Gadget
                     {
                         this.Token = config.Token;
                         this.OwnerId = config.OwnerId;
+                        this.TestGuildId = config.TestGuildId;
 
                         if (ContainsDefaultValues())
                         {
@@ -71,11 +75,7 @@ namespace Gadget
 
         private void WriteDefaultConfig(string filepath)
         {
-            BotConfig inputConfig = new BotConfig()
-            {
-                Token = "token",
-                OwnerId = "-1"
-            };
+            BotConfig inputConfig = new BotConfig();
 
             string input = JsonConvert.SerializeObject(inputConfig);
 
@@ -86,7 +86,7 @@ namespace Gadget
 
         private bool ContainsDefaultValues()
         {
-            return (Token == "token" && OwnerId == "-1");
+            return (Token == "token" && OwnerId == "-1" && TestGuildId == ulong.MinValue);
         }
     }
 }

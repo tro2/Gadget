@@ -1,7 +1,7 @@
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Newtonsoft.Json;
+using Discord.Interactions;
 
 namespace Gadget
 {
@@ -20,6 +20,7 @@ namespace Gadget
         // Keep the CommandService and DI container around for use with commands.
         // These two types require you install the Discord.Net.Commands package.
         private readonly CommandService _commands;
+        private readonly InteractionService _interactions;
         private readonly CommandHandler _commandHandler;
         private readonly BotConfig _botConfig;
 
@@ -41,21 +42,21 @@ namespace Gadget
                 CaseSensitiveCommands = false,
             });
 
-            _commandHandler = new CommandHandler(_client, _commands);
+            _interactions = new InteractionService(_client, new InteractionServiceConfig
+            {
+                LogLevel = LogSeverity.Info,
+            });
+
+            _commandHandler = new CommandHandler(_client, _commands, _interactions);
             _botConfig = new BotConfig();
 
-            // Subscribe the logging handler to both the client and the CommandService.
-            _client.Log += Log;
-            _commands.Log += Log;
+            _client.Log += LogAsync;
+            _commands.Log += LogAsync;
+            _interactions.Log += LogAsync;
 
+            _client.Ready += ReadyAsync;
         }
 
-        private static Task Log(LogMessage message)
-        {
-            Logger.Write(message);
-
-            return Task.CompletedTask;
-        }
 
         private async Task MainAsync()
         {
@@ -73,7 +74,7 @@ namespace Gadget
             }
 
             // Centralize the logic for commands into a separate method.
-            await _commandHandler.InstallCommandsAsync();
+            await _commandHandler.InitializeAsync();
 
             // Login and connect.
 
@@ -82,6 +83,24 @@ namespace Gadget
 
             // Wait infinitely so your bot actually stays connected.
             await Task.Delay(Timeout.Infinite);
+        }
+
+        private Task LogAsync(LogMessage message)
+        {
+            Logger.Write(message);
+
+            return Task.CompletedTask;
+        }
+
+        private async Task ReadyAsync()
+        {
+            Logger.Write(LogSeverity.Info, "Commands registering to test guild");
+
+            await _interactions.RegisterCommandsToGuildAsync(_botConfig.TestGuildId);
+
+            Console.WriteLine(_interactions.SlashCommands.Count);
+
+            Logger.Write(LogSeverity.Info, "Commands registered successfully");
         }
     }
 }
