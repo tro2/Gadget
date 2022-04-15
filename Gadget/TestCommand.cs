@@ -9,6 +9,8 @@ namespace Gadget
         [Summary("Test")]
         public async Task TestMessageAsync()
         {
+            Thread.Sleep(2500);
+
             await ReplyAsync("Test Successful");
         }
     }

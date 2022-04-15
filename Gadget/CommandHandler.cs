@@ -76,7 +76,8 @@ namespace Gadget
 
         private async Task HandleSlashCommandAsync(SocketSlashCommand command)
         {
-            await command.RespondAsync("Test Successful");
+            var context = new SocketInteractionContext(_client, command);
+            await _interactions.ExecuteCommandAsync(context, null);
         }
     }
 }

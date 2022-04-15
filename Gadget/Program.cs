@@ -40,11 +40,13 @@ namespace Gadget
             {
                 LogLevel = LogSeverity.Info,
                 CaseSensitiveCommands = false,
+                DefaultRunMode = Discord.Commands.RunMode.Async
             });
 
             _interactions = new InteractionService(_client, new InteractionServiceConfig
             {
                 LogLevel = LogSeverity.Info,
+                DefaultRunMode = Discord.Interactions.RunMode.Async
             });
 
             _commandHandler = new CommandHandler(_client, _commands, _interactions);
