@@ -1,3 +1,4 @@
+using Discord;
 using Discord.Commands;
 
 namespace Gadget
@@ -7,11 +8,12 @@ namespace Gadget
         // ~say hello world -> hello world
         [Command("test")]
         [Summary("Test")]
+        [RequireRole()]
         public async Task TestMessageAsync()
         {
-            Thread.Sleep(2500);
+            var heartEmoji = new Emoji("\U0001f495");
 
-            await ReplyAsync("Test Successful");
+            await Context.Message.AddReactionAsync(heartEmoji);
         }
     }
 }

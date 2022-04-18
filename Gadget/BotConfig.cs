@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 namespace Gadget
 {
     [JsonObject(MemberSerialization.OptIn)]
-    class BotConfig
+    public class BotConfig
     {
         //==========================================================================
         // Constructors
@@ -12,8 +12,9 @@ namespace Gadget
         public BotConfig()
         {
             Token = "token";
-            OwnerId = "-1";
+            OwnerId = ulong.MinValue;
             TestGuildId = ulong.MinValue;
+            IgnoredGuilds = new ulong[] { ulong.MinValue };
         }
 
         //==========================================================================
@@ -22,9 +23,11 @@ namespace Gadget
         [JsonProperty]
         public string Token { get; set; }
         [JsonProperty]
-        public string OwnerId { get; set; }
+        public ulong OwnerId { get; set; }
         [JsonProperty]
         public ulong TestGuildId { get; set; }
+        [JsonProperty]
+        public ulong[] IgnoredGuilds { get; set; }
 
         //==========================================================================
         // Methods
@@ -40,15 +43,18 @@ namespace Gadget
                 {
                     BotConfig? config = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText(filepath));
 
-                    if (config != null && !string.IsNullOrWhiteSpace(config.Token) && !string.IsNullOrWhiteSpace(config.OwnerId))
+                    if (config != null)
                     {
                         this.Token = config.Token;
                         this.OwnerId = config.OwnerId;
                         this.TestGuildId = config.TestGuildId;
+                        this.IgnoredGuilds = config.IgnoredGuilds;
 
                         if (ContainsDefaultValues())
                         {
-                            Logger.Write(Discord.LogSeverity.Error, "Bot config cotains default values, please overwrite them before starting the bot again");
+                            WriteConfig(filepath, config);
+
+                            Logger.Write(Discord.LogSeverity.Error, "BotConfig", "Bot config cotains default values, overwrite them before starting the bot again");
                         }
                         else
                         {
@@ -57,36 +63,39 @@ namespace Gadget
                     }
                     else
                     {
-                        Logger.Write(Discord.LogSeverity.Error, "Bot config was in an unreadable format");
+                        Logger.Write(Discord.LogSeverity.Error, "BotConfig", "Bot config was in an unreadable format");
                     }
                 }
                 catch (Exception e)
                 {
-                    Logger.Write(Discord.LogSeverity.Error, "", e);
+                    Logger.Write(Discord.LogSeverity.Error, "BotConfig", "", e);
                 }
             }
             else
             {
-                WriteDefaultConfig(filepath);
+                WriteConfig(filepath, new BotConfig());
+
+                Logger.Write(Discord.LogSeverity.Error, "BotConfig", "New botconfig.json created with default values, overwrite them before starting the bot");
             }
 
             return success;
         }
 
-        private void WriteDefaultConfig(string filepath)
+        private void WriteConfig(string filepath, BotConfig config)
         {
-            BotConfig inputConfig = new BotConfig();
-
-            string input = JsonConvert.SerializeObject(inputConfig);
+            string input = JsonConvert.SerializeObject(config);
 
             System.IO.File.WriteAllText(filepath, input);
-
-            Logger.Write(Discord.LogSeverity.Error, "New botconfig.json created with default values, overwrite them before starting the bot");
         }
 
         private bool ContainsDefaultValues()
         {
-            return (Token == "token" && OwnerId == "-1" && TestGuildId == ulong.MinValue);
+            return (
+                Token == "token" ||
+                OwnerId == ulong.MinValue ||
+                TestGuildId == ulong.MinValue ||
+                IgnoredGuilds.Length > 0 &&
+                IgnoredGuilds[0] == ulong.MinValue);
         }
     }
 }

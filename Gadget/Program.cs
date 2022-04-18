@@ -16,9 +16,6 @@ namespace Gadget
         }
 
         private readonly DiscordSocketClient _client;
-
-        // Keep the CommandService and DI container around for use with commands.
-        // These two types require you install the Discord.Net.Commands package.
         private readonly CommandService _commands;
         private readonly InteractionService _interactions;
         private readonly CommandHandler _commandHandler;
@@ -34,6 +31,7 @@ namespace Gadget
                 // (eg. checking Reactions, checking the content of edited/deleted messages),
                 // you must set the MessageCacheSize. You may adjust the number as needed.
                 MessageCacheSize = 200,
+                GatewayIntents = GatewayIntents.All
             });
 
             _commands = new CommandService(new CommandServiceConfig
@@ -49,8 +47,9 @@ namespace Gadget
                 DefaultRunMode = Discord.Interactions.RunMode.Async
             });
 
-            _commandHandler = new CommandHandler(_client, _commands, _interactions);
             _botConfig = new BotConfig();
+
+            _commandHandler = new CommandHandler(_client, _commands, _interactions, _botConfig);
 
             _client.Log += LogAsync;
             _commands.Log += LogAsync;
@@ -96,13 +95,13 @@ namespace Gadget
 
         private async Task ReadyAsync()
         {
-            Logger.Write(LogSeverity.Info, "Commands registering to test guild");
+            _commandHandler.ValidateCommandTables(); //2nd step of making sure commands are ready to go
 
             await _interactions.RegisterCommandsToGuildAsync(_botConfig.TestGuildId);
 
-            Console.WriteLine(_interactions.SlashCommands.Count);
+            var sc = _interactions.SlashCommands.Count;
 
-            Logger.Write(LogSeverity.Info, "Commands registered successfully");
+            Logger.Write(LogSeverity.Info, "InteractionService", $"Successfully registered {sc} slash commands to the test guild");
         }
     }
 }

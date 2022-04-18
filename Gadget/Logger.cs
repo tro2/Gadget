@@ -27,7 +27,7 @@ namespace Gadget
             Console.ResetColor();
         }
 
-        public static void Write(LogSeverity severity, string message, Exception? exception = null)
+        public static void Write(LogSeverity severity, string source, string message, Exception? exception = null)
         {
             switch (severity)
             {
@@ -46,15 +46,7 @@ namespace Gadget
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     break;
             }
-            if (exception == null)
-            {
-                Console.WriteLine($"{DateTime.Now,-19} [{severity,8}] {message}");
-            }
-            else
-            {
-                Console.WriteLine($"{DateTime.Now,-19} [{severity,8}] {exception.Message}");
-            }
-
+            Console.WriteLine($"{DateTime.Now,-19} [{severity,8}] {source}: {message} {exception}");
             Console.ResetColor();
         }
     }
